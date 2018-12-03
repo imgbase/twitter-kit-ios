@@ -1,101 +1,103 @@
-**Twitter will be discontinuing support for Twitter Kit on October 31, 2018. [Read the blog post here](https://blog.twitter.com/developer/en_us/topics/tools/2018/discontinuing-support-for-twitter-kit-sdk.html).**
+**As of October 31, 2018, Twitter Kit will no longer be supported by Twitter. Please read the [blog post](https://blog.twitter.com/developer/en_us/topics/tools/2018/discontinuing-support-for-twitter-kit-sdk.html) for more information.**
 
-# Twitter Kit for iOS
+---
 
-## Background
+Twitter Kit is the easiest way to bring real-time conversational content to your apps. Growing an app’s user base and retaining end users can be a challenge for any developer. To keep users engaged, you need rich, unique content that feels natural to your app’s experience.
 
-Twitter Kit is a native SDK to include Twitter content in mobile apps. Twitter Kit is designed to make interacting with Twitter seamless and efficient.
+To install, add `TwitterKit` to your `Podfile` and run `pod install`. If you already have `TwitterKit` just run `pod update TwitterKit`.
 
-Using Twitter Kit from source in production applications is not officially supported. Please utilize the official binaries released via [CocoaPods](https://cocoapods.org/pods/TwitterKit) or [Carthage](https://github.com/Carthage/Carthage).
+### Show a Single Tweet
 
-## Twitter Kit Features
-
-* Display Tweets and timelines
-  * Native views to display Tweets in alignment with Twitter's display guidelines.
-  * Timeline adapters for displaying collections, lists, and profile timelines from the Twitter API
-  * Search result timelines using the Search API, with additional client-side filter capability
-* Compose Tweets
-  * Share Tweets with text, URLs, photos and video.
-  * Automatically handles API access and login for quick sharing.
-* Monetize with MoPub integration
-  * Easy integration of MoPub's display ads tools with Twitter content.
-* Log in with Twitter
-  * Authorize users, using the Twitter accounts already on their phone.
-  * Support for requesting email address
-* Access the Twitter API
-  * API client for all interactions with the Twitter API.
-
-## Components of Twitter Kit iOS
-
-* TwitterCore
-  * Network calls are handled
-* TwitterKit
-  * Tweet display
-* TwitterShareExtensionUI
-  * Tweet composer 
-
-## Installation
-
-### Get started
-
-* Generate your Twitter API keys through the [Twitter developer apps dashboard](https://apps.twitter.com/).
-* Install Twitter Kit using instructions below.
-* For extensive documentation, please see the official [documentation](https://github.com/twitter/twitter-kit-ios/wiki).
-	
-### Install using Cocoapods
-
-To add Twitter Kit to your app, simply add `TwitterKit` to your Podfile.
-
-```ruby
-target 'MyApp' do
-  use_frameworks!
-  pod 'TwitterKit'
-end
-```
-
-### Install using Carthage
-
-To install Twitter Kit for iOS using Carthage, add the following lines to your Cartfile. For more information about how to set up Carthage and your Cartfile, see [here](https://github.com/Carthage/Carthage).
+To show a single Tweet, you first need to load that Tweet from the network and then create and configure a `TWTRTweetView` with that `TWTRTweet` model object. Then it may be added to the view hierarchy:
 
 ```swift
-binary "https://ton.twimg.com/syndication/twitterkit/ios/TwitterKit.json"
-binary "https://ton.twimg.com/syndication/twitterkit/ios/TwitterCore.json"
+    import TwitterKit
+
+    TWTRAPIClient().loadTweetWithID("20") { tweet, error in
+      if let t = tweet {
+        let tweetView = TWTRTweetView(tweet: t)
+        tweetView.center = view.center
+        view.addSubview(tweetView)
+      } else {
+        print("Failed to load Tweet: \(error)")
+      }
+    }
 ```
 
-After running `carthage update`, add `TwitterKit.framework` and `TwitterShareExtensionUI.framework` to the `Linked Frameworks and Binaries` section under General of your App target. In addition to that, make sure that when you are adding the copy-frameworks run script for Carthage that you add the following input paths: 
+<img src="https://dev.twitter.com/_images/search_timeline.png" width="250"/>
+
+
+#### Configuring Tweet View Colors & Themes
+To change the colors of a Tweet view you can either set properties directly on the `TWTRTweetView` instances or on the `UIAppearanceProxy` of the `TWTRTweetView`.
 
 ```swift
-$(SRCROOT)/Carthage/Build/iOS/TwitterCore.framework
-$(SRCROOT)/Carthage/Build/iOS/TwitterKit.framework
-$(SRCROOT)/Carthage/Build/iOS/TwitterShareExtensionUI.framework
+  // Set the theme directly
+  tweetView.theme = .Dark
+
+  // Use custom colors
+  tweetView.primaryTextColor = .yellowColor()
+  tweetView.backgroundColor = .blueColor()
 ```
 
-Make sure that the run script phase is after your Link Binaries with Libraries phase to prevent issues with properly archiving your iOS application.
+<img src="https://dev.twitter.com/_images/show_tweet_themed.png" width="250"/>
 
-### Preview Twitter Kit Features in the Demo App
 
-Twitter Kit includes a demonstration app allowing you to preview features, and verify functionality. Create Twitter API keys as above, and then:
 
-* To check out a demo app with features already built in, rename `DemoApp/Config.xcconfig.sample` to `DemoApp/Config.xcconfig` and populate the consumer key and secret.
-* Run `DemoApp.xcworkspace` on Xcode to verify build.
+Set visual properties using the `UIAppearanceProxy` for `TWTRTweetView`.
 
-## Code of conduct
+```
+  // Set all future tweet views to use dark theme using UIAppearanceProxy
+  TWTRTweetView.appearance().theme = .Dark
+```
 
-This, and all github.com/twitter projects, are under the [Twitter Open Source Code of Conduct](https://github.com/twitter/code-of-conduct/blob/master/code-of-conduct.md). Additionally, see the [Typelevel Code of Conduct](http://typelevel.org/conduct) for specific examples of harassing behavior that are not tolerated.
+### Show a TableView of Tweets
 
-## Contribution
+```swift
+import TwitterKit
 
-The master branch of this repository contains the latest stable release of Twitter Kit.
+class UserTimelineViewController: TWTRTimelineViewController {
 
-Twitter Kit can be used as a dependency for substantial other work, and we welcome fixes and enhancements to the core libraries as well. See [CONTRIBUTING.md](https://github.com/twitter/twitter-kit-ios/blob/master/CONTRIBUTING.md) for more details about how to contribute.
+    override func viewDidLoad() {
+        super.viewDidLoad()
 
-## Contact
+        let client = TWTRAPIClient.clientWithCurrentUser()
+        self.dataSource = TWTRUserTimelineDataSource(screenName: "twitterdev", APIClient: client)
+        self.showTweetActions = true
+    }
 
-For usage questions post on [Twitter Community](https://twittercommunity.com/tags/c/publisher/twitter/ios).
-Please report any bugs as [issues](https://github.com/twitter/twitter-kit-ios/issues).
-Follow [@TwitterDev](http://twitter.com/twitterdev) on Twitter for updates.
+}
+```
 
-## License
+<img src="https://dev.twitter.com/_images/user_timeline.png" width="250"/>
 
-Copyright 2017 Twitter, Inc.
-Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
+
+### Compose Tweets
+To allow users to composer their own Tweets from within your app, simply create a `TWTRComposer` and call `show(from: UIViewController, completion:)` on the instance. This class automatically handles presenting a log in controller if there are no logged in sessions.
+
+
+```swift
+
+let composer = TWTRComposer()
+
+composer.setText("just setting up my Twitter Kit")
+composer.setImage(UIImage(named: "twitterkit"))
+
+// Called from a UIViewController
+composer.show(from: self.navigationController!) { (result in
+    if (result == .done) {
+        print("Successfully composed Tweet")
+    } else {
+        print("Cancelled composing")
+    }
+}
+```
+
+<img src="https://dev.twitter.com/_images/compose_tweet.png" width="250"/>
+
+
+
+## Resources		
+
+ * [Documentation](https://dev.twitter.com/twitterkit/ios/overview)		
+ * [Forums](https://twittercommunity.com/c/publisher/twitter)		
+ * Follow us on Twitter: [@TwitterDev](https://twitter.com/TwitterDev)		
