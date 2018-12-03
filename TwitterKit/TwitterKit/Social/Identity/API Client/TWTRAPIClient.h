@@ -202,7 +202,7 @@ typedef void (^TWTRRequestEmailCompletion)(NSString *_Nullable email, NSError *_
  *  @param contentType The HTTP content type of the media that you are uploading.
  *  @param completion  The completion handler to invoke.
  */
-- (void)uploadMedia:(NSData *)media contentType:(NSString *)contentType completion:(TWTRMediaUploadResponseCompletion)completion;
+- (void)uploadMedia:(NSData *)media contentType:(NSString *)contentType mediaCategory:(NSString *)mediaCategory completion:(TWTRMediaUploadResponseCompletion)completion;
 
 /**
  *  Create and send a Tweet.

@@ -611,14 +611,14 @@ static id<TWTRSessionStore_Private> TWTRSharedSessionStore = nil;
 
 #pragma mark - Media Upload
 
-- (void)uploadMedia:(NSData *)media contentType:(NSString *)contentType completion:(TWTRMediaUploadResponseCompletion)completion
+- (void)uploadMedia:(NSData *)media contentType:(NSString *)contentType mediaCategory:(NSString *)mediaCategory completion:(TWTRMediaUploadResponseCompletion)completion
 {
     TWTRParameterAssertOrReturn(completion);
     TWTRCheckArgumentWithCompletion2(media && contentType, completion);
 
     TWTRMultipartFormDocument *doc = [self multipartFormDocumentForMedia:media contentType:contentType];
     NSMutableURLRequest *request = [self partialURLRequestForUploadingMediaWithContentType:doc.contentTypeHeaderField];
-
+    [request setValue:mediaCategory forHTTPHeaderField:@"media_category"];
     [doc loadBodyDataWithCallbackQueue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
                             completion:^(NSData *data) {
                                 request.HTTPBody = data;
